@@ -1,5 +1,5 @@
 #$a0 = source $a1 = Destination
-#vd : $a0 = "hello" $a1 = "cc " => $a1 = "cc hello"  
+#vd : $a0 = "hello" $a2 = "cc " => $a3 = "cc hello"  
 Str.Concatenate:
 	addi $sp,$sp,4
 	sw $ra,0($sp)
@@ -11,6 +11,7 @@ Str.Concatenate:
 	or $a1, $v0, $zero
 	jal Str.Copier
 	lw $ra,0($sp)
+	subi $sp,$sp,4
 	jr $ra
 
 
@@ -31,4 +32,5 @@ loop:
 loop.out:
 	lw $ra,0($sp)
 	or $v0, $t1, $zero # Return last position on result buffer
+	subi $sp,$sp,4
 	jr $ra
