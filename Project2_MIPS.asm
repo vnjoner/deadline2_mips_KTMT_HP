@@ -6,8 +6,10 @@
 
 	TIME_1: .space 11
 	TIME_2:	.space 11
-	
+
 	fin : .asciiz "input.txt"
+	fout : .asciiz "output.txt"
+	
 	errorInput: .asciiz "Loi File Input.\n"
 #Can---------------------------
 	Giap: .asciiz " Giap"
@@ -56,7 +58,7 @@
 	type: .asciiz "Loai (A/B/C): "
 	result: .asciiz "\nKet qua: "
 	m_continue: .asciiz "\nChon (1) de tiep tuc, (0) de thoat:  "
-	newline: .asciiz "\n"
+	newline: .asciiz "\r\n"
 
 	ArrayOption: .word do1,do2,do3,do4,do5,do6,do7,do8,do9
 
@@ -194,13 +196,9 @@ do8:
 
 do9:
 
+
 #Read File --> obuffer 
 	jal File.Read
-
-	la $a0,obuffer
-	li $v0,4
-	syscall
-
 
 #Tach obuffer -> TIME_1 , TIME_2
 	la $a0,obuffer
@@ -209,19 +207,29 @@ do9:
 
 	jal Time.Split
 
-	la $a0,TIME_1
-	li $v0,4
+#open file for wirte
+	li      $v0,13                  
+	la      $a0,fout                
+	li      $a1,1                   
+	li      $a2,0                   
+	syscall                         
+	move    $s6,$v0                 
+#write file
+	la $a1,TIME_1
+	jal File.Puts
+
+	la $a1,newline
+	jal File.Puts
+
+	la $a1,TIME_2
+	jal File.Puts
+
+#close file
+	li $v0,16
+	move $a0,$s6
 	syscall
 
-	la $a0,newline
-	li $v0,4
-	syscall
 
-	la $a0,TIME_2
-	li $v0,4
-	syscall
-
-	j Menu.End
 
 
 
@@ -266,10 +274,35 @@ File.Read:
 	addi $sp,$sp,12
 	jr $ra
 
+
+#$a1 = string 
+File.Puts:
+	subi $sp,$sp,12
+	sw $ra,0($sp)
+	sw $v0,4($sp)
+	sw $a2,8($sp)
+	move    $a2,$a1                 # get buffer address
+
+fputs_loop:
+	lb      $t0,0($a2)              # get next character -- is it EOS?
+	addiu   $a2,$a2,1               # pre-increment pointer
+	bnez    $t0,fputs_loop          
+
+	subu    $a2,$a2,$a1             # get strlen + 1
+	subiu   $a2,$a2,1               # compensate for pre-increment
+
+	move    $a0,$s6                 # get file descriptor
+	li      $v0,15                  # for write to file
+	syscall
+
+	lw $ra,0($sp)
+	lw $v0,4($sp)
+	lw $a2,8($sp)
+	addi $sp,$sp,12
+	jr      $ra                     # return
 #$a0 = obuffer
 #$a1 = TIME_1
 #$a2 = TIME_2
-
 Time.Split:
 	subi $sp,$sp,16
 	sw $ra,0($sp)
