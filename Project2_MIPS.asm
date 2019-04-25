@@ -10,6 +10,8 @@
 	date1: .word 1,1,1
 	date2: .word 1,1,1
 
+	leapYear: .word 0,0 #luu 2 nam nhuan gan nhat
+
 	fin : .asciiz "input.txt"
 	fout : .asciiz "output.txt"
 
@@ -1468,3 +1470,55 @@ Year: # Nam cua time: $a0 = time
 		add $t2,$t3,$t2
 		move $v0,$t2
 		jr $s2
+LeapYearNearly: #$a0; char*time
+			#luu dia chi tra ve
+			move $t6,$ra
+			#lay data tu char*time vao trong date1 de su dung
+			la $t7,date1
+			jal Day
+			sw $v0, ($t7)
+			jal Month
+			sw $v0, 4($t7)
+			jal Year
+			sw $v0, 8($t7)
+			la $t0,date1
+			lw $s1,8($t0) # year
+			li $t2,0
+			li $t3,1
+		ASC:	add $t4,$s1,$t3
+			move $a0,$t4
+			jal LeapYear
+			beq $v0,1,StoreA
+			j DEC
+		DEC:	sub $t4,$s1,$t3
+			move $a0,$t4
+			jal LeapYear
+			beq $v0,1,StoreD
+		T1:
+			addi $t3,$t3,1
+			j ASC
+		StoreA:	move $t7,$ra
+			la $t5,leapYear
+			add $t5,$t5,$t2
+			sw $t4,($t5)
+			addi $t2,$t2,4
+			beq $t2,8, Return
+			addi $t7,$t7,1
+			j DEC
+		StoreD:	la $t5,leapYear
+			add $t5,$t5,$t2
+			sw $t4,($t5)
+			addi $t2,$t2,4
+			beq $t2,8, Return
+			j T1
+		Return:	la $t5,leapYear #in ra man hinh: vd:  2016    2020
+			li $v0,1
+			lw $a0,($t5)
+			syscall
+			li $v0,11
+			li $a0,'\t'
+			syscall
+			li $v0,1
+			lw $a0,4($t5)
+			syscall
+			jr $t6
