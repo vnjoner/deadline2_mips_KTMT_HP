@@ -17,6 +17,9 @@
 	fout : .asciiz "output.txt"
 
 	errorInput: .asciiz "Loi File Input.\n"
+# nam nhuan
+	trueLeapYear: .asciiz "  la nam nhuan"
+	falseLeapYear: .asciiz "  khong la nam nhuan"
 #Thu ngay--------------------------
 	mon: .asciiz "Monday"
 	tue: .asciiz " Tuesday"
@@ -199,8 +202,16 @@ do2:
 	j Menu.End
 
 do3:
-	li $a0,3
+	la $a0,Time
+	jal Year
+	move $a0,$v0
 	li $v0,1
+	syscall
+	jal LeapYear
+	move $t0,$v0
+	beq $t0,1,isLeapYear
+	li $v0,4
+	la $a0,falseLeapYear
 	syscall
 	j Menu.End
 
