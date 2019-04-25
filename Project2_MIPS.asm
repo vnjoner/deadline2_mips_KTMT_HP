@@ -596,6 +596,7 @@ CanChi:
 	li 	$2, 5
 	syscall
 	move 	$10, $2
+	
 	sw	$15, -80($sp)
 	sw 	$14, -84($sp)
 	sw	$10, -88($sp)
@@ -741,39 +742,133 @@ exit:
 	lw	$10, -88($sp)
       	move $a0, $15
       	jal itoa
-
+      	
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', nex1
+      	bne 	$t4, '\0', nex0
+	nex0:
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
 
       	lb 	$t4, 1($s0)
-      	beq	$t4, '\0', nex1
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
+      	j slash1
       	nex1:
+      	li 	$t4, '0'
+      	sb 	$t4, ($s1)
+      	add 	$s1, $s1, 1
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	
+      	slash1:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
       	add	$s1, $s1, 1
 
       	move $a0, $14
       	jal itoa
-
+      	
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', nex3		# neu gap null thi nex
+	bne 	$t4, '\0', nex2
+	nex2:
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
 
       	lb 	$t4, 1($s0)
-      	beq	$t4, '\0', nex2		# neu gap null thi nex
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	nex2:
+      	j slash2
+      	nex3:
+      	li 	$t4, '0'
+      	sb 	$t4, ($s1)
+      	add 	$s1, $s1, 1
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	
+      	slash2:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
       	add	$s1, $s1, 1
 
       	move $a0, $10
  	jal itoa
+ 	
+ 	blt $10, 10, less10
+ 	blt $10, 100, less100
+ 	blt $10, 1000, less1000
+ 	blt $10, 10000, less10000
+ 	less10:
+ 	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
 
+      	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	addi 	$s1, $s1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($s1) #endstring
+ 	j here
+ 	less100:
+ 	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	lb 	$t4, 1($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	addi 	$s1, $s1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($s1) #endstring
+ 	j here
+ 	less1000:
+ 	li 	$t4, '0'
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	lb 	$t4, 1($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	lb 	$t4, 2($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+ 	addi 	$s1, $s1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($s1) #endstring
+ 	j here
+ 	less10000:
  	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
@@ -792,8 +887,9 @@ exit:
 
  	addi 	$s1, $s1, 1
  	li 	$t4, '\0' 		#null terminator
- 	sb 	$t4, ($s1)
+ 	sb 	$t4, ($s1) #endstring
 
+	here:
 	lw $ra, -48($sp)
 	lw $t1, -56($sp)
 	lw $t5, -60($sp)
@@ -802,7 +898,7 @@ exit:
 	lw $t4, -72($sp)
 	lw $s0, -76($sp)
 	jr 	$ra
-
+	
 .globl itoa
 # a0 = num
 # s0 = addr cua return value
