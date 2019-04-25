@@ -584,9 +584,6 @@ CanChi:
 	li 	$2, 5
 	syscall
 	move 	$10, $2
-	move 	$s5, $15
-	move	$s6, $14
-	move 	$s7, $10
 	sw	$15, -80($sp)
 	sw 	$14, -84($sp)
 	sw	$10, -88($sp)
