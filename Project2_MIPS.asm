@@ -184,9 +184,18 @@ do1:
 	j Menu.End
 
 do2:
-	li $a0,2
-	li $v0,1
+	li $v0, 4
+	la $a0, typeMsg
 	syscall
+	
+	li $v0, 12
+	syscall
+	
+	jal convert
+	la $a0, kq_convert
+	li $v0, 4
+	syscall
+	
 	j Menu.End
 
 do3:
@@ -575,7 +584,9 @@ CanChi:
 	li 	$2, 5
 	syscall
 	move 	$10, $2
-
+	move 	$s5, $15
+	move	$s6, $14
+	move 	$s7, $10
 	sw	$15, -80($sp)
 	sw 	$14, -84($sp)
 	sw	$10, -88($sp)
@@ -823,21 +834,23 @@ itoa:
 convert:
 	sw $ra, -44($sp)
 	sw $a1, -52($sp)
+	sw $13, -92($sp)
 	# ngay $15
 	# thang $14
 	# nam $10
 	# type $13
-	li $13, 'B'
-
-	la 	$a1, kq_convert
-
-	beq 	$13, 'A', A
-	beq 	$13, 'B', B
-	beq 	$13, 'C', C
+	
+	#li $13, 'A'
+	
+	beq 	$v0, 'A', A
+	beq 	$v0, 'B', B
+	beq 	$v0, 'C', C
+	
+	A:
 	lw	$15, -80($sp)
 	lw 	$14, -84($sp)
 	lw	$10, -88($sp)
-	A:
+	la 	$a1, kq_convert
 	move $a0, $14
       	jal itoa
 
@@ -895,8 +908,13 @@ convert:
 
 	lw 	$ra, -44($sp)
 	lw $a1, -52($sp)
+	lw $13, -92($sp)
       	jr 	$ra
 	B:#s3s4s7t7 free
+	lw	$15, -80($sp)
+	lw 	$14, -84($sp)
+	lw	$10, -88($sp)
+	la 	$a1, kq_convert
 	beq 	$14, 1, thang1
 	beq 	$14, 2, thang2
 	beq 	$14, 3, thang3
@@ -1100,8 +1118,13 @@ convert:
 
 	lw 	$ra, -44($sp)
 	lw $a1, -52($sp)
+	lw $13, -92($sp)
 	jr 	$ra
 	C:
+	lw	$15, -80($sp)
+	lw 	$14, -84($sp)
+	lw	$10, -88($sp)
+	la 	$a1, kq_convert
 	move 	$a0, $15
       	jal 	itoa
 
@@ -1305,6 +1328,7 @@ convert:
 
 	lw 	$ra, -44($sp)
 	lw $a1, -52($sp)
+	lw $13, -92($sp)
 	jr 	$ra
 #---------------------------------Anh huy
 Day:   # Ngay cua time: $a0 = time
