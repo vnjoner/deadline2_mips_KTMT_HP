@@ -665,6 +665,8 @@ exit:
 	# true thi bien TIME se mang gia tri cua ngay vua nhap, addr bien time auto gan vao $a0
 	check:
 	sw $ra, -48($sp)
+	sw $t1, -56($sp)
+	sw $t5, -60($sp)
 	#kiem tra nam 0k
 	sgt 	$t1, $10, $zero
 	beqz 	$t1, false 
@@ -701,10 +703,11 @@ exit:
 	#move 	$ra, $s0
 	#jr 	$ra
 	true:
-	move 	$k0, $s1 
-	move 	$fp, $a0
-	move 	$v0, $t4
-	move 	$v1, $s0
+	sw $s1, -64($sp)
+	sw $a0, -68($sp)
+	sw $t4, -72($sp)
+	sw $s0, -76($sp)
+	
 	# neu true thi bat dau luu vao time
 	la 	$s1, ($s2)
       	
@@ -763,12 +766,13 @@ exit:
  	li 	$t4, '\0' 		#null terminator
  	sb 	$t4, ($s1)
 	
-	move 	$s1, $k0
-	move 	$a0, $fp
-	move 	$t4, $v0
-	move 	$s0, $v1
-	
 	lw $ra, -48($sp)
+	lw $t1, -56($sp)
+	lw $t5, -60($sp)
+	lw $s1, -64($sp)
+	lw $a0, -68($sp)
+	lw $t4, -72($sp)
+	lw $s0, -76($sp)
 	jr 	$ra
 	
 .globl itoa
