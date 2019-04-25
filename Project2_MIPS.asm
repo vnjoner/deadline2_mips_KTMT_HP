@@ -509,11 +509,15 @@ loopCopier.out:
 	addi 	$sp,$sp,12
 	jr 	$ra
 
+#$a3 = nam
+#KQ = CanChi.Result
 CanChi:
-	subi	$sp,$sp,8
+	subi	$sp,$sp,16
 	sw 	$ra,0($sp)
+	sw	$t0,4($sp)
+	sw	$t1,8($sp)
+	sw	$3,12($sp)
 
-	li 	$a3,2019
 
 #tinh toan can = (nam + 6 )%10
 	move 	$t0,$a3
@@ -552,13 +556,14 @@ CanChi:
 
 	jal 	Str.Concatenate
 
-	la 	$a0,CanChi.Result
-	li 	$v0,4
-	syscall
 
 	lw 	$ra,0($sp)
-	addi 	$sp,$sp,8
+	lw	$t0,4($sp)
+	lw	$t1,8($sp)
+	lw	$3,12($sp)
+	addi 	$sp,$sp,16
 	jr 	$ra
+
 
 #----------------BHUY
 .globl nhapTime
