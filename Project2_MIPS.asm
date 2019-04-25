@@ -82,6 +82,15 @@ Running:
 	syscall	
 	beq	$v0, $0, Exit
 	j	Running
+	#---
+	#uncomment ben duoi de test thay doi ham nhap
+	#la $s2, Time <- truyen bien vao cho nay, time1, time2, time3..
+	#jal nhapTime
+	
+	#la $a0, Time
+	#li $v0, 4
+	#syscall
+	#---
 
 Exit:
 	li $v0,10
@@ -522,7 +531,7 @@ CanChi:
 	#nam nhap se luu vao $10, dang int
 	#void nhapTime
 	nhapTime:
-	sw 	$ra, ($sp)
+	move 	$sp, $ra
 	li 	$2, 4
 	la 	$4, msgNgay
 	syscall
@@ -548,7 +557,7 @@ CanChi:
 	
 	jal 	check
 	
-	lw 	$ra, ($sp)
+	move 	$ra, $sp
 	jr 	$ra
 	
 .globl is_leap_year
@@ -629,9 +638,8 @@ exit:
 .globl check
 	# check(int ngay, int thang, int nam)
 	# false thi exit program
-	# true thi bien TIME se mang gia tri cua ngay vua nhap, addr bien time auto gan vao $a0
+	# true thi vi tri $s2 se mang gia tri cua ngay vua nhap
 	check:
-	
 	move 	$t9, $ra
 	#kiem tra nam 0k
 	sgt 	$t1, $10, $zero
@@ -665,12 +673,10 @@ exit:
 	
 	li 	$v0, 10
 	syscall
-	#li 	$a0, 0
-	#move 	$ra, $s0
-	#jr 	$ra
+	
 	true:
 	# neu true thi bat dau luu vao time
-	la 	$s1, Time
+	la 	$s1, ($s2) #load s2 vao s1 (s2 co the = time1, time2, time3, vv)
       	
       	move $a0, $15
       	jal itoa
@@ -1239,6 +1245,7 @@ convert:
 	
       	move 	$ra, $s6	
 	jr 	$ra
+#---------------------------------
 #---------------------------------Anh huy
 Day:   # Ngay cua time: $a0 = time
 	addi $sp, $sp, -12
