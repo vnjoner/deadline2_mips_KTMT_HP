@@ -187,15 +187,15 @@ do2:
 	li $v0, 4
 	la $a0, typeMsg
 	syscall
-	
+
 	li $v0, 12
 	syscall
-	
+
 	jal convert
 	la $a0, kq_convert
 	li $v0, 4
 	syscall
-	
+
 	j Menu.End
 
 do3:
@@ -205,8 +205,10 @@ do3:
 	j Menu.End
 
 do4:
-	li $a0,4
-	li $v0,1
+	la $a0,Time
+	jal WeekDay
+	move $a0,$v0
+	li $v0,4
 	syscall
 	j Menu.End
 
@@ -223,14 +225,24 @@ do6:
 	j Menu.End
 
 do7:
-	li $a0,7
+	la $s2, TIME_2
+	jal nhapTime
+	li $a0,'\n'
+	li $v0,11
+	syscall
+	la $a0,Time
+	la $a1,TIME_2
+	jal DateDiff
+	move $a0,$v0
 	li $v0,1
 	syscall
 	j Menu.End
 
 do8:
-	li $a0,8
-	li $v0,1
+	la $a0,Time
+	jal LeapYearNearly
+	move $a0,$v0
+	li $v0,4
 	syscall
 	j Menu.End
 
@@ -836,13 +848,13 @@ convert:
 	# thang $14
 	# nam $10
 	# type $13
-	
+
 	#li $13, 'A'
-	
+
 	beq 	$v0, 'A', A
 	beq 	$v0, 'B', B
 	beq 	$v0, 'C', C
-	
+
 	A:
 	lw	$15, -80($sp)
 	lw 	$14, -84($sp)
@@ -1429,6 +1441,7 @@ Year: # Nam cua time: $a0 = time
 		la $a0,date1
 		jal DayofDate
 		move $t0,$v0
+		subi $t0,$t0,366 # do cong DayofDate phia tren tinh ra du 366(do cong thuc)
 		li $t1,7
 		div $t0,$t1
 		mfhi $t2
