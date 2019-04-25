@@ -7,10 +7,21 @@
 	TIME_1: .space 11
 	TIME_2:	.space 11
 
+	date1: .word 1,1,1
+	date2: .word 1,1,1
+
 	fin : .asciiz "input.txt"
 	fout : .asciiz "output.txt"
-	
+
 	errorInput: .asciiz "Loi File Input.\n"
+#Thu ngay--------------------------
+	mon: .asciiz "Monday"
+	tue: .asciiz " Tuesday"
+	web: .asciiz "Wednesday"
+	thur: .asciiz "Thursday"
+	fri: .asciiz "Friday"
+	sat: .asciiz "Saturday"
+	sun: .asciiz "Sunday"
 #Can---------------------------
 	Giap: .asciiz " Giap"
 	At: .asciiz " At"
@@ -32,7 +43,7 @@
 	Ngo: .asciiz " Ngo"
 	Mui: .asciiz " Mui"
 	Than: .asciiz " Than"
-	Dau: .asciiz " Dau" 
+	Dau: .asciiz " Dau"
 	Tuat: .asciiz " Tuat"
 	Hoi: .asciiz " Hoi"
 	Chi: .word Ty,Suu,Dan,Meo,Thin,Ty,Ngo,Mui,Than,Dau,Tuat,Hoi
@@ -79,14 +90,14 @@ Running:
 	syscall
 
 	li	$v0, 5
-	syscall	
+	syscall
 	beq	$v0, $0, Exit
 	j	Running
 	#---
 	#uncomment ben duoi de test thay doi ham nhap
 	#la $s2, Time <- truyen bien vao cho nay, time1, time2, time3..
 	#jal nhapTime
-	
+
 	#la $a0, Time
 	#li $v0, 4
 	#syscall
@@ -101,60 +112,60 @@ Exit:
 Menu:
 	addi	$sp, $sp, -4
 	sw	$ra, 0($sp)
-	
+
 	#####################NHAP TIME################################ Them vao day
 	la $s2, Time #la bien time vao $s2 de nhap
 	jal nhapTime
-	
+
 	li	$v0, 4
 	la	$a0, MENU
 	syscall
-	
+
 	la	$a0, option1
-	syscall 
-	
+	syscall
+
 	la	$a0, option2
-	syscall 
+	syscall
 
 	la	$a0, option2a
-	syscall 
+	syscall
 
 	la	$a0, option2b
-	syscall 
+	syscall
 
 	la	$a0, option2c
-	syscall 
+	syscall
 
 	la	$a0, option3
-	syscall 
+	syscall
 
 	la	$a0, option4
-	syscall 
+	syscall
 
 	la	$a0, option5
-	syscall 
+	syscall
 
 	la	$a0, option6
-	syscall 
+	syscall
 
 	la	$a0, option7
-	syscall 
+	syscall
 
 	la	$a0, option8
-	syscall 
+	syscall
 
 	la	$a0, option9
-	syscall 
+	syscall
 
 	la	$a0, stuff
-	syscall 
+	syscall
 
 	la	$a0, option
 	syscall
 
 	la	$v0, 5
 	syscall
-	
+
 	addi	$v0, $v0, -1
 	sll	$v0, $v0, 2
 	la	$t0, ArrayOption
@@ -261,7 +272,7 @@ TIME.Default:
 	sw	$t0,8($sp)
 
 	li $t0,'\\'
-	
+
 	sb $t0,2($a0)
 	sb $t0,5($a0)
 
@@ -280,13 +291,13 @@ File.Write:
 	sw	$a0,4($sp)
 	sw	$s6,8($sp)
 	sw	$v0,12($sp)
-	
-	li      $v0,13                  
-	li      $a1,1                   
-	li      $a2,0                   
+
+	li      $v0,13
+	li      $a1,1
+	li      $a2,0
 	syscall
-	bltz	$v0,ERROR            
-	move   	$s6,$v0                 
+	bltz	$v0,ERROR
+	move   	$s6,$v0
 #write file
 	la	$a1,TIME_1
 	jal	fputs
@@ -375,12 +386,12 @@ loopTime_1:
 	addi 	$a0,$a0,1
 	addi 	$a1,$a1,1
 	subi 	$t0,$t0,1
-	
+
 	j 	loopTime_1
 loopTime_1.Out:
 
 
-	
+
 #lay TIME_2
 	li 	$t0,10
 	addi 	$a0,$a0,2
@@ -391,7 +402,7 @@ loopTime_2:
 	addi 	$a0,$a0,1
 	addi 	$a2,$a2,1
 	subi 	$t0,$t0,1
-	
+
 	j 	loopTime_2
 loopTime_2.Out:
 
@@ -404,8 +415,8 @@ loopTime_2.Out:
 	addi 	$sp,$sp,24
 	jr 	$ra
 
-	
-#$a1 = string 
+
+#$a1 = string
 fputs:
 	subi 	$sp,$sp,12
 	sw 	$ra,0($sp)
@@ -477,7 +488,7 @@ loopCopier.out:
 CanChi:
 	subi	$sp,$sp,8
 	sw 	$ra,0($sp)
-	
+
 	li 	$a3,2019
 
 #tinh toan can = (nam + 6 )%10
@@ -520,7 +531,7 @@ CanChi:
 	la 	$a0,CanChi.Result
 	li 	$v0,4
 	syscall
-	
+
 	lw 	$ra,0($sp)
 	addi 	$sp,$sp,8
 	jr 	$ra
@@ -539,28 +550,28 @@ CanChi:
 	li 	$2, 5
 	syscall
 	move 	$15, $2
-	
-	
+
+
 	li 	$2, 4
 	la 	$4, msgThang
 	syscall
 	li 	$2, 5
 	syscall
 	move 	$14, $2
-	
-	
+
+
 	li 	$2, 4
 	la 	$4, msgNam
 	syscall
 	li 	$2, 5
 	syscall
 	move 	$10, $2
-	
+
 	jal 	check
-	
+
 	move 	$ra, $sp
 	jr 	$ra
-	
+
 .globl is_leap_year
 	#bool is_leap_year(int year)
 	#a0 = year
@@ -572,17 +583,17 @@ CanChi:
         divu    $a0, $t0                # year/4
         mfhi    $t1                     # tim so du
         bne     $t1, $zero, exit        # khong chia het cho 4
-	
+
         li      $t0, 100                # $t0 = 100
         div    	$a0, $t0                # year/100
-        mfhi    $t1                     
+        mfhi    $t1
         bne     $t1, $zero, set_true    # k chia het cho 100 (year < 100)
 
         # chia het cho 100
         # va chia het cho 400 thi ok
         li      $t0, 400                # $t0 = 400
         divu    $a0, $t0                # year/400
-        mfhi    $t1                     
+        mfhi    $t1
         bne     $t1, $zero, exit        # k chia het cho 400
 set_true:
         addi    $v0, $v0, 1             # true
@@ -594,7 +605,7 @@ exit:
 	#int slNgay(int thang, int nam)
 	#thang = $14
 	#nam = $10
-	
+
 	slNgay:
 	move 	$s1, $ra
 	beq 	$14, 1, slngay31
@@ -604,37 +615,37 @@ exit:
 	beq 	$14, 8, slngay31
 	beq 	$14, 10, slngay31
 	beq 	$14, 12, slngay31
-	
+
 	beq 	$14, 4, slngay30
 	beq 	$14, 6, slngay30
 	beq 	$14, 9, slngay30
 	beq 	$14, 11, slngay30
-	
+
 	slngaythang2:
 	move 	$a0, $10
 	jal 	is_leap_year
 	beq 	$v0, 0, thang2khongnhuan
-	
+
 	beq 	$v0, 1, thang2nhuan
-	
+
 	thang2nhuan:
 	li 	$a0, 29
 	move 	$ra, $s1
 	jr 	$ra
-	
+
 	thang2khongnhuan:
 	li 	$a0, 28
 	move 	$ra, $s1
 	jr 	$ra
-	
+
 	slngay31:
 	li 	$a0, 31
 	jr 	$ra
-	
+
 	slngay30:
 	li 	$a0, 30
 	jr 	$ra
-	
+
 
 .globl check
 	# check(int ngay, int thang, int nam)
@@ -644,48 +655,48 @@ exit:
 	move 	$t9, $ra
 	#kiem tra nam 0k
 	sgt 	$t1, $10, $zero
-	beqz 	$t1, false 
-	
+	beqz 	$t1, false
+
 	#kiem tra thang 0k
 	li 	$t5, 0 #thang > 0
 	sgt 	$t1, $14, $t5
 	beqz 	$t1, false
-	
+
 	li 	$t5, 13 #thang < 13
 	slt 	$t1, $14, $t5
 	beqz 	$t1, false
-	
+
 	#kiem tra ngay
 	li 	$t5, 0
 	sgt 	$t1, $15, $t5 #if ngay > 0 -> t1 = 1
 	beqz 	$t1, false #if t1 = 0 -> ngay < 1 -> false
-	
+
 	jal 	slNgay
 	#a0 = slngay
 	#neu ngay > a0 return false
-	
-	
+
+
 	ble 	$15, $a0, true
-	
+
 	false:
 	la 	$a0, errMsg
 	li 	$v0, 4
 	syscall
-	
+
 	li 	$v0, 10
 	syscall
-	
+
 	true:
 	# neu true thi bat dau luu vao time
 	la 	$s1, ($s2) #load s2 vao s1 (s2 co the = time1, time2, time3, vv)
-      	
+
       	move $a0, $15
       	jal itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
- 
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', nex1
       	sb   	$t4, ($s1)     		# luu vao time
@@ -694,10 +705,10 @@ exit:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
       	add	$s1, $s1, 1
-      	
+
       	move $a0, $14
       	jal itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
@@ -710,33 +721,33 @@ exit:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
       	add	$s1, $s1, 1
-      	
+
       	move $a0, $10
  	jal itoa
- 	
+
  	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 1($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
- 	
+
  	lb 	$t4, 2($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 3($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	
+
  	addi 	$s1, $s1, 1
  	li 	$t4, '\0' 		#null terminator
  	sb 	$t4, ($s1)
-	
+
 	move 	$ra, $t9
 	jr 	$ra
-	
+
 .globl itoa
 # a0 = num
 # s0 = addr cua return value
@@ -749,7 +760,7 @@ itoa:
       	sb   	$t1, ($t0)     		# init. with ascii 0
       	li   	$t3, 10        		# t3 = 10
       	beq  	$a0, $0, end_itoa 	# =0 thi end
-	
+
 	loop_itoa:
       	div  	$a0, $t3       		# a /= 10
       	mflo 	$a0
@@ -759,11 +770,11 @@ itoa:
       	sub  	$t0, $t0, 1    		# lui buf ve 1 o
       	bne  	$a0, $0, loop_itoa  	# neu chua = 0 thi tiep tuc
       	addi 	$t0, $t0, 1    		# len buf 1 o de ve dung' vi tri
-	
+
 	end_itoa:
       	move 	$s0, $t0      		# tra dia chi str ve s0
       	move 	$ra, $s5
-      	jr   	$ra      
+      	jr   	$ra
 
 .globl convert
 
@@ -774,20 +785,20 @@ convert:
 	# nam $10
 	# type $13
 	li $13, 'B'
-	
+
 	la 	$a1, kq_convert
-	
+
 	beq 	$13, 'A', A
 	beq 	$13, 'B', B
 	beq 	$13, 'C', C
 	A:
 	move $a0, $14
       	jal itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', cnex1
       	sb   	$t4, ($a1)     		# luu vao time
@@ -796,10 +807,10 @@ convert:
       	li 	$t4, '/'
       	sb	$t4, ($a1)
       	add	$a1, $a1, 1
-      	
+
       	move $a0, $15
       	jal itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
@@ -812,30 +823,30 @@ convert:
       	li 	$t4, '/'
       	sb	$t4, ($a1)
       	add	$a1, $a1, 1
-      	
+
       	move $a0, $10
  	jal itoa
- 	
+
  	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 1($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 	
+
  	lb 	$t4, 2($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 3($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
  	addi 	$a1, $a1, 1
  	li 	$t4, '\0' 		#null terminator
  	sb 	$t4, ($a1)
- 	
+
       	move 	$ra, $s6
       	jr 	$ra
 	B:#s3s4s7t7 free
@@ -851,16 +862,16 @@ convert:
 	beq 	$14, 10, thang10
 	beq 	$14, 11, thang11
 	beq 	$14, 12, thang12
-	
+
 	thang1:#kq=a1
 	li 	$t4, 'J'
 	sb 	$t4, ($a1)
 	add	$a1, $a1, 1
-	
+
 	li 	$t4, 'a'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'n'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -869,11 +880,11 @@ convert:
 	li 	$t4, 'F'
 	sb 	$t4, ($a1)
 	add	$a1, $a1, 1
-	
+
 	li 	$t4, 'e'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'b'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -882,11 +893,11 @@ convert:
 	li 	$t4, 'M'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'a'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'r'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -911,7 +922,7 @@ convert:
 	add 	$a1, $a1, 1
 	li 	$t4, 'y'
 	sb 	$t4, ($a1)
-	add 	$a1, $a1, 1 
+	add 	$a1, $a1, 1
 	j 	next
 	thang6:
 	li 	$t4, 'J'
@@ -989,67 +1000,67 @@ convert:
 	li 	$t4, 'c'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	next:
-	
+
 	li 	$t4, ' '
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	move 	$a0, $15
       	jal 	itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', Bnex
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
 	Bnex:
-	
+
 	li 	$t4, ','
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, ' '
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	move 	$a0, $10
  	jal 	itoa
- 	
+
  	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 1($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 	
+
  	lb 	$t4, 2($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 3($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
  	addi 	$a1, $a1, 1
  	li 	$t4, '\0' 		#null terminator
  	sb 	$t4, ($a1)
-	
+
 	move 	$ra, $s6
 	jr 	$ra
 	C:
 	move 	$a0, $15
       	jal 	itoa
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', Cnex
       	sb   	$t4, ($a1)     		# luu vao time
@@ -1058,7 +1069,7 @@ convert:
 	li 	$t4, ' '
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	beq 	$14, 1, thang1C
 	beq 	$14, 2, thang2C
 	beq 	$14, 3, thang3C
@@ -1071,16 +1082,16 @@ convert:
 	beq 	$14, 10, thang10C
 	beq 	$14, 11, thang11C
 	beq 	$14, 12, thang12C
-	
+
 	thang1C:#kq=a1
 	li 	$t4, 'J'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'a'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'n'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -1089,11 +1100,11 @@ convert:
 	li 	$t4, 'F'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'e'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'b'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -1102,11 +1113,11 @@ convert:
 	li 	$t4, 'M'
 	sb 	$t4, ($a1)
 	add	$a1, $a1, 1
-	
+
 	li 	$t4, 'a'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, 'r'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
@@ -1131,7 +1142,7 @@ convert:
 	add 	$a1, $a1, 1
 	li 	$t4, 'y'
 	sb 	$t4, ($a1)
-	add 	$a1, $a1, 1 
+	add 	$a1, $a1, 1
 	j 	nextC
 	thang6C:
 	li 	$t4, 'J'
@@ -1209,42 +1220,42 @@ convert:
 	li 	$t4, 'c'
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	nextC:
 	li 	$t4, ','
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
+
 	li 	$t4, ' '
 	sb 	$t4, ($a1)
 	add 	$a1, $a1, 1
-	
-	
-	
+
+
+
 	move 	$a0, $10
  	jal 	itoa
- 	
+
  	lb 	$t4, 0($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 1($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
- 	
+
  	lb 	$t4, 2($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
       	lb 	$t4, 3($s0)
       	sb   	$t4, ($a1)     		# luu vao time
       	add  	$a1, $a1, 1    		# len 1 o
-      	
+
  	addi 	$a1, $a1, 1
  	li 	$t4, '\0' 		#null terminator
  	sb 	$t4, ($a1)
-	
-      	move 	$ra, $s6	
+
+      	move 	$ra, $s6
 	jr 	$ra
 #---------------------------------
 #---------------------------------Anh huy
@@ -1265,7 +1276,7 @@ Day:   # Ngay cua time: $a0 = time
 	lb $t2, 1($a0)
 	sub $t2, $t2, $t0
 	add $v0, $v0, $t2
-	
+
 	lw $t0, ($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
@@ -1290,12 +1301,12 @@ Month: # Thang cua time: $a0 = time
 	lb $t2, 4($a0)
 	sub $t2, $t2, $t0
 	add $v0, $v0, $t2
-	
+
 	lw $t0, ($sp)
 	lw $t1, 4($sp)
 	lw $t2, 8($sp)
 	addi $sp, $sp, 12
-	
+
 	jr $ra
 
 Year: # Nam cua time: $a0 = time
@@ -1306,12 +1317,12 @@ Year: # Nam cua time: $a0 = time
 
 	li $t0, '0'
 
-	lb $t1, 6($a0) 
+	lb $t1, 6($a0)
 	sub $t1, $t1, $t0
 	li $t2, 1000
 	mult $t2, $t1
 	mflo $v0
-	
+
 	lb $t1, 7($a0)
 	sub $t1, $t1, $t0
 	li $t2, 100
@@ -1336,6 +1347,124 @@ Year: # Nam cua time: $a0 = time
 	addi $sp, $sp, 12
 
 	jr $ra
+	WeekDay:
+		#dua du lieu data vao date1
+		la $t7,date1
+		jal Day
+		sw $v0, ($t7)
+		jal Month
+		sw $v0, 4($t7)
+		jal Year
+		sw $v0, 8($t7)
+		move $s5,$ra
+		la $a0,date1
+		jal DayofDate
+		move $t0,$v0
+		li $t1,7
+		div $t0,$t1
+		mfhi $t2
+		beq $t2,0,B0
+		beq $t2,1,B1
+		beq $t2,2,B2
+		beq $t2,3,B3
+		beq $t2,4,B4
+		beq $t2,5,B5
+		beq $t2,6,B6
+	B0:	la $v0,mon
+		j B7
+	B1:	la $v0,tue
+		j B7
+	B2:	la $v0,web
+		j B7
+	B3:	la $v0,thur
+		j B7
+	B4:	la $v0,fri
+		j B7
+	B5:	la $v0,sat
+		j B7
+	B6:	la $v0,sun
+	B7:	jr $s5
+	DateDiff:
+		move $s1, $ra
+		#dua du lieu data vao date1
+		la $t7,date1
+		jal Day
+		sw $v0, ($t7)
+		jal Month
+		sw $v0, 4($t7)
+		jal Year
+		sw $v0, 8($t7)
+		#dua du lieu data vao date2
+		move $a0,$a1
+		la $t7,date2
+		jal Day
+		sw $v0, ($t7)
+		jal Month
+		sw $v0, 4($t7)
+		jal Year
+		sw $v0, 8($t7)
+		#year1 = t0, year2 = t1
+		la $a0,date1
+		jal DayofDate
+		move $s3,$v0
+		la $a0,date2
+		jal DayofDate
+		move $s4,$v0
+		sub $s3,$s3,$s4
+		abs $v0,$s3
+		jr $s1
+	DayofDate:
+		move $s0,$a0
+		move $s2,$ra
+		li $t2,0
+		li $t3,0
+		lw $t4,8($s0)
+	CountLeapYear:
 
-
-
+		#
+		lw $t4,8($s0)
+		lw $t3,4($s0)
+		ble $t3,2,D1
+		j D2
+	D1:	subi $t4,$t4,1
+	D2:
+		#years / 4 - years / 100 + years / 400
+		li $t0,4
+		div $t4,$t0
+		mflo $t2
+		li $t0,100
+		div $t4,$t0
+		mflo $t3
+		sub $t2,$t2,$t3
+		li $t0,400
+		div $t4,$t0
+		mflo $t3
+		add $t2,$t2,$t3
+		#
+		li $t3,1
+	DayofMonth:
+		li $t1,31
+		beq $t3,4,L1
+		beq $t3,6,L1
+		beq $t3,9,L1
+		beq $t3,11,L1
+		beq $t3,2,L2
+		j TOP
+	L1: 	li $t1,30 # ham tam
+		j TOP
+	L2:	li $t1,28
+	TOP:	lw $t4,4($s0)
+		beq $t3,$t4,L3
+		add $t2,$t1,$t2
+		addi $t3,$t3,1
+		j DayofMonth
+	L3:
+		lw $t4,($s0)
+		add $t2,$t4,$t2
+		lw $t4,8($s0)
+		li $t3,365
+		mult $t3,$t4
+		mflo $t3
+		add $t2,$t3,$t2
+		move $v0,$t2
+		jr $s2
