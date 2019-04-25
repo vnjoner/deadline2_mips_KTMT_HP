@@ -575,6 +575,10 @@ CanChi:
 	syscall
 	move 	$10, $2
 	
+	sw	$15, -80($sp)
+	sw 	$14, -84($sp)
+	sw	$10, -88($sp)
+	
 	jal 	check
 	
 	lw 	$15, -4($sp)
@@ -667,6 +671,7 @@ exit:
 	sw $ra, -48($sp)
 	sw $t1, -56($sp)
 	sw $t5, -60($sp)
+	
 	#kiem tra nam 0k
 	sgt 	$t1, $10, $zero
 	beqz 	$t1, false 
@@ -710,7 +715,9 @@ exit:
 	
 	# neu true thi bat dau luu vao time
 	la 	$s1, ($s2)
-      	
+      	lw	$15, -80($sp)
+	lw 	$14, -84($sp)
+	lw	$10, -88($sp)
       	move $a0, $15
       	jal itoa
       	
@@ -826,6 +833,9 @@ convert:
 	beq 	$13, 'A', A
 	beq 	$13, 'B', B
 	beq 	$13, 'C', C
+	lw	$15, -80($sp)
+	lw 	$14, -84($sp)
+	lw	$10, -88($sp)
 	A:
 	move $a0, $14
       	jal itoa
