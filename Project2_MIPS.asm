@@ -596,7 +596,7 @@ CanChi:
 	li 	$2, 5
 	syscall
 	move 	$10, $2
-	
+
 	sw	$15, -80($sp)
 	sw 	$14, -84($sp)
 	sw	$10, -88($sp)
@@ -742,7 +742,7 @@ exit:
 	lw	$10, -88($sp)
       	move $a0, $15
       	jal itoa
-      	
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', nex1
       	bne 	$t4, '\0', nex0
@@ -759,11 +759,11 @@ exit:
       	li 	$t4, '0'
       	sb 	$t4, ($s1)
       	add 	$s1, $s1, 1
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	
+
       	slash1:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
@@ -771,7 +771,7 @@ exit:
 
       	move $a0, $14
       	jal itoa
-      	
+
       	lb 	$t4, 1($s0)
       	beq	$t4, '\0', nex3		# neu gap null thi nex
 	bne 	$t4, '\0', nex2
@@ -788,11 +788,11 @@ exit:
       	li 	$t4, '0'
       	sb 	$t4, ($s1)
       	add 	$s1, $s1, 1
-      	
+
       	lb 	$t4, 0($s0)
       	sb   	$t4, ($s1)     		# luu vao time
       	add  	$s1, $s1, 1    		# len 1 o
-      	
+
       	slash2:
       	li 	$t4, '/'
       	sb	$t4, ($s1)
@@ -800,7 +800,7 @@ exit:
 
       	move $a0, $10
  	jal itoa
- 	
+
  	blt $10, 10, less10
  	blt $10, 100, less100
  	blt $10, 1000, less1000
@@ -898,7 +898,7 @@ exit:
 	lw $t4, -72($sp)
 	lw $s0, -76($sp)
 	jr 	$ra
-	
+
 .globl itoa
 # a0 = num
 # s0 = addr cua return value
@@ -1525,6 +1525,7 @@ Year: # Nam cua time: $a0 = time
 
 	jr $ra
 	WeekDay:
+		move $s5,$ra
 		#dua du lieu data vao date1
 		la $t7,date1
 		jal Day
@@ -1533,7 +1534,6 @@ Year: # Nam cua time: $a0 = time
 		sw $v0, 4($t7)
 		jal Year
 		sw $v0, 8($t7)
-		move $s5,$ra
 		la $a0,date1
 		jal DayofDate
 		move $t0,$v0
