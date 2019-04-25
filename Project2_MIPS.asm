@@ -203,40 +203,34 @@ do8:
 
 do9:
 
-
-#Read File --> obuffer 
-	jal File.Read
+#Read File --> obuffer
+	la 	$a0,fin
+	jal 	File.Read
 
 #Tach obuffer -> TIME_1 , TIME_2
-	la $a0,obuffer
-	la $a1,TIME_1
-	la $a2,TIME_2
+	la 	$a0,obuffer
+	la 	$a1,TIME_1
+	la 	$a2,TIME_2
 
-	jal Time.Split
+	jal 	Time.Split
 
-#open file for wirte
-	li      $v0,13                  
-	la      $a0,fout                
-	li      $a1,1                   
-	li      $a2,0                   
-	syscall                         
-	move    $s6,$v0                 
-#write file
-	la $a1,TIME_1
-	jal File.Puts
+	la	$a0,TIME_1
+	jal	TIME.Default
 
-	la $a1,newline
-	jal File.Puts
+	la	$a0,TIME_2
+	jal	TIME.Default
 
-	la $a1,TIME_2
-	jal File.Puts
+	la $a0,fout
+	jal File.Write
 
-#close file
-	li $v0,16
-	move $a0,$s6
+	la $a0,TIME_1
+	jal Month
+	move $a0,$v0
+	li $v0,1
 	syscall
 
 
+	j 	Menu.End
 
 
 
@@ -248,58 +242,177 @@ Menu.End:
 
 
 
+#$a0 = Time(dd mm yyyy)
+#return $a0 = Time (dd/mm/yyyy)
+TIME.Default:
+	addi	$sp,$sp,-12
+	sw	$ra,0($sp)
+	sw	$a0,4($sp)
+	sw	$t0,8($sp)
 
-#$a0 = fileName
-#KQ = obuffer
-File.Read:
-#open file
-	subi $sp,$sp,12
-	sw $ra,0($sp)
-	sw $s6,4($sp)
-	sw $v0,8($sp)
-#open file
-	li $v0,13
-	la $a0,fin
-	li $a1,0
-	li $a2,0
+	li $t0,'\\'
+	
+	sb $t0,2($a0)
+	sb $t0,5($a0)
+
+	lw	$ra,0($sp)
+	lw	$a0,4($sp)
+	lw	$t0,8($sp)
+	addi	$sp,$sp,12
+	jr	$ra
+
+
+#$a0 = file name output
+File.Write:
+#open file for wirte
+	addi	$sp,$sp,-16
+	sw	$ra,0($sp)
+	sw	$a0,4($sp)
+	sw	$s6,8($sp)
+	sw	$v0,12($sp)
+	
+	li      $v0,13                  
+	li      $a1,1                   
+	li      $a2,0                   
 	syscall
-	move $s6,$v0
-#read file
-	li $v0,14
-	move $a0,$s6
-	la $a1,obuffer
-	li $a2,22
-	syscall
-#lose file
-	li $v0,16
-	move $a0,$s6
+	bltz	$v0,ERROR            
+	move   	$s6,$v0                 
+#write file
+	la	$a1,TIME_1
+	jal	fputs
+
+	la	$a1,newline
+	jal	fputs
+
+	la	$a1,TIME_2
+	jal	fputs
+
+#close file
+	li	$v0,16
+	move	$a0,$s6
 	syscall
 
-	lw $ra,0($sp)
-	lw $s6,4($sp)
-	lw $v0,8($sp)
-	addi $sp,$sp,12
+	lw	$ra,0($sp)
+	lw	$a0,4($sp)
+	lw	$s6,8($sp)
+	lw	$v0,12($sp)
+	addi	$sp,$sp,16
 	jr $ra
 
+#$a0 = fileName Input
+#KQ = obuffer
+File.Read:
+	subi	$sp,$sp,24
+	sw	$ra,0($sp)
+	sw 	$s6,4($sp)
+	sw 	$v0,8($sp)
+	sw  	$a0,12($sp)
+	sw	$a1,16($sp)
+	sw	$a2,20($sp)
+#open file
+	li 	$v0,13
+	li 	$a1,0
+	li 	$a2,0
+	syscall
 
+	bltz 	$v0,ERROR
+	move 	$s6,$v0
+#read file
+	li 	$v0,14
+	move 	$a0,$s6
+	la 	$a1,obuffer
+	li 	$a2,22
+	syscall
+#lose file
+	li 	$v0,16
+	move 	$a0,$s6
+	syscall
+
+	lw 	$ra,0($sp)
+	lw 	$s6,4($sp)
+	lw 	$v0,8($sp)
+	lw  	$a0,12($sp)
+	lw 	$a1,16($sp)
+	lw 	$a2,20($sp)
+	addi 	$sp,$sp,24
+	jr 	$ra
+ERROR:
+	li 	$v0,4
+	la 	$a0,errorInput
+
+	li 	$v0,10
+	syscall
+
+#$a0 = obuffer
+#$a1 = TIME_1
+#$a2 = TIME_2
+
+Time.Split:
+	subi 	$sp,$sp,24
+	sw 	$ra,0($sp)
+	sw 	$a0, 4($sp)
+	sw 	$a1, 8($sp)
+	sw 	$a2, 12($sp)
+	sw 	$t0,16($sp)
+	sw 	$t2,20($sp)
+
+#Lay TIME_1
+	li 	$t0,10
+loopTime_1:
+	beq 	$t0,$0,loopTime_1.Out
+	lb 	$t2,0($a0)
+	sb 	$t2,0($a1)
+	addi 	$a0,$a0,1
+	addi 	$a1,$a1,1
+	subi 	$t0,$t0,1
+	
+	j 	loopTime_1
+loopTime_1.Out:
+
+
+	
+#lay TIME_2
+	li 	$t0,10
+	addi 	$a0,$a0,2
+loopTime_2:
+	beq 	$t0,$0,loopTime_2.Out
+	lb 	$t2,0($a0)
+	sb 	$t2,0($a2)
+	addi 	$a0,$a0,1
+	addi 	$a2,$a2,1
+	subi 	$t0,$t0,1
+	
+	j 	loopTime_2
+loopTime_2.Out:
+
+	lw 	$ra,0($sp)
+	lw 	$a0, 4($sp)
+	lw 	$a1, 8($sp)
+	lw 	$a2, 12($sp)
+	lw 	$t0,16($sp)
+	lw 	$t2,20($sp)
+	addi 	$sp,$sp,24
+	jr 	$ra
+
+	
 #$a1 = string 
-File.Puts:
-	subi $sp,$sp,12
-	sw $ra,0($sp)
-	sw $v0,4($sp)
-	sw $a2,8($sp)
+fputs:
+	subi 	$sp,$sp,12
+	sw 	$ra,0($sp)
+	sw 	$v0,4($sp)
+	sw 	$a2,8($sp)
 	move    $a2,$a1                 # get buffer address
 
 fputs_loop:
 	lb      $t0,0($a2)              # get next character -- is it EOS?
 	addiu   $a2,$a2,1               # pre-increment pointer
-	bnez    $t0,fputs_loop          
+	bnez    $t0,fputs_loop          # no, loop
 
 	subu    $a2,$a2,$a1             # get strlen + 1
 	subiu   $a2,$a2,1               # compensate for pre-increment
 
 	move    $a0,$s6                 # get file descriptor
-	li      $v0,15                  # for write to file
+	li      $v0,15                  # syscall for write to file
 	syscall
 
 	lw $ra,0($sp)
@@ -307,143 +420,101 @@ fputs_loop:
 	lw $a2,8($sp)
 	addi $sp,$sp,12
 	jr      $ra                     # return
-#$a0 = obuffer
-#$a1 = TIME_1
-#$a2 = TIME_2
-Time.Split:
-	subi $sp,$sp,16
-	sw $ra,0($sp)
-	sw $a0, 4($sp)
-	sw $a1, 8($sp)
-	sw $a2, 12($sp)
-
-#Lay TIME_1
-	li $t0,10
-loopTime_1:
-	beq $t0,$0,loopTime_1.Out
-	lb $t2,0($a0)
-	sb $t2,0($a1)
-	addi $a0,$a0,1
-	addi $a1,$a1,1
-	subi $t0,$t0,1
-	
-	j loopTime_1
-loopTime_1.Out:
-
-
-	
-#lay TIME_2
-	li $t0,10
-	addi $a0,$a0,2
-loopTime_2:
-	beq $t0,$0,loopTime_2.Out
-	lb $t2,0($a0)
-	sb $t2,0($a2)
-	addi $a0,$a0,1
-	addi $a2,$a2,1
-	subi $t0,$t0,1
-	
-	j loopTime_2
-loopTime_2.Out:
-
-
-	lw $ra,0($sp)
-	lw $a0, 4($sp)
-	lw $a1, 8($sp)
-	lw $a2, 12($sp)
-	addi $sp,$sp,16
-	jr $ra
-
-	
 
 
 #$a0 = source1, $a2 = source2 ,$a1 = Destination
 Str.Concatenate:
-	subi $sp,$sp,4
-	sw $ra,0($sp)
+	subi 	$sp,$sp,4
+	sw 	$ra,0($sp)
 # Copy first string to result buffer
-	jal Str.Copier
+	jal 	Str.Copier
 	nop
 # Concatenate second string on result buffer
-	la $a0, ($a2)
-	or $a1, $v0, $zero
-	jal Str.Copier
-	lw $ra,0($sp)
-	addi $sp,$sp,4
-	jr $ra
+	la 	$a0, ($a2)
+	or 	$a1, $v0, $zero
+	jal 	Str.Copier
+	lw 	$ra,0($sp)
+	addi 	$sp,$sp,4
+	jr 	$ra
 
 
 #$a0 = source1 $a1 = Destination
+#$v0 = result
 Str.Copier:
-	subi $sp,$sp,4
-	sw $ra,0($sp)
-	or $t0, $a0, $zero # Source
-	or $t1, $a1, $zero # Destination
+	subi 	$sp,$sp,4
+	sw 	$ra,0($sp)
+	sw 	$t0,4($sp)
+	sw 	$t1,8($sp)
+
+	or 	$t0, $a0, $zero # Source
+	or 	$t1, $a1, $zero # Destination
 
 loopCopier:
-	lb $t2, 0($t0)
-	beq $t2, $zero, loopCopier.out
-	addiu $t0, $t0, 1
-	sb $t2, 0($t1)
-	addiu $t1, $t1, 1
-	b loopCopier
+	lb 	$t2, 0($t0)
+	beq 	$t2, $zero, loopCopier.out
+	addiu 	$t0, $t0, 1
+	sb 	$t2, 0($t1)
+	addiu 	$t1, $t1, 1
+	b 	loopCopier
 loopCopier.out:
-	lw $ra,0($sp)
-	or $v0, $t1, $zero # Return last position on result buffer
-	addi $sp,$sp,4
-	jr $ra
+	or 	$v0, $t1, $zero # Return last position on result buffer
+	lw 	$ra,0($sp)
+	lw 	$t0,4($sp)
+	lw 	$t1,8($sp)
+	addi 	$sp,$sp,12
+	jr 	$ra
 
-#dang update
 CanChi:
-	subi $sp,$sp,8
-	sw $ra,0($sp)
+	subi	$sp,$sp,8
+	sw 	$ra,0($sp)
 	
-	li $a3,2019
+	li 	$a3,2019
 
 #tinh toan can = (nam + 6 )%10
-	move $t0,$a3
-	addi $t0,$t0,6
-	li $t3,10
-	div $t0,$t3
-	mfhi $t0
+	move 	$t0,$a3
+	addi 	$t0,$t0,6
+	li 	$t3,10
+	div 	$t0,$t3
+	mfhi 	$t0
 
 #tinh toan chi = (nam + 8) %12
-	move $t1,$a3
-	addi $t1,$t1,8
-	li $t3,12
-	div $t1,$t3
-	mfhi $t1
+	move 	$t1,$a3
+	addi 	$t1,$t1,8
+	li 	$t3,12
+	div 	$t1,$t3
+	mfhi 	$t1
 
 #Nhan can * 4 , Chi * 4
 
-	li $t3,4
-	mult $t3,$t1
-	mflo $t1
+	li 	$t3,4
+	mult 	$t3,$t1
+	mflo 	$t1
 
-	mult $t3,$t0
-	mflo $t0
+	mult 	$t3,$t0
+	mflo 	$t0
 
 #Point address arry Can,Chi
-	la $t3,Can
-	la $t4,Chi
+	la 	$t3,Can
+	la 	$t4,Chi
 
 #lay vi tri tuong ung
-	add $t3,$t3,$t0
-	add $t4,$t4,$t1
+	add 	$t3,$t3,$t0
+	add 	$t4,$t4,$t1
 
-	la $a0,($t3)
-	lw $a2, ($t4)
-	la $a1, CanChi.Result
+	la 	$a0,($t3)
+	lw 	$a2, ($t4)
+	la 	$a1, CanChi.Result
 
-	jal Str.Concatenate
+	jal 	Str.Concatenate
 
-	la $a0,CanChi.Result
-	li $v0,4
+	la 	$a0,CanChi.Result
+	li 	$v0,4
 	syscall
 	
-	lw $ra,0($sp)
-	addi $sp,$sp,8
-	jr $ra
+	lw 	$ra,0($sp)
+	addi 	$sp,$sp,8
+	jr 	$ra
+
 #----------------BHUY
 .globl nhapTime
 	#ngay nhap se luu vao $15, dang int
@@ -1168,5 +1239,95 @@ convert:
 	
       	move 	$ra, $s6	
 	jr 	$ra
-#---------------------------------
+#---------------------------------Anh huy
+Day:   # Ngay cua time: $a0 = time
+	addi $sp, $sp, -12
+	sw $t0, ($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+
+	li $t0, '0'
+	li $t1, 10
+
+	lb $t2, ($a0)
+	sub $t2, $t2, $t0
+	mult $t1, $t2
+	mflo $v0
+
+	lb $t2, 1($a0)
+	sub $t2, $t2, $t0
+	add $v0, $v0, $t2
+	
+	lw $t0, ($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	addi $sp, $sp, 12
+
+	jr $ra
+
+Month: # Thang cua time: $a0 = time
+	addi $sp, $sp, -12
+	sw $t0, ($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+
+	li $t0, '0'
+	li $t1, 10
+
+	lb $t2, 3($a0)
+	sub $t2, $t2, $t0
+	mult $t1, $t2
+	mflo $v0
+
+	lb $t2, 4($a0)
+	sub $t2, $t2, $t0
+	add $v0, $v0, $t2
+	
+	lw $t0, ($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	addi $sp, $sp, 12
+	
+	jr $ra
+
+Year: # Nam cua time: $a0 = time
+	addi $sp, $sp, -12
+	sw $t0, ($sp)
+	sw $t1, 4($sp)
+	sw $t2, 8($sp)
+
+	li $t0, '0'
+
+	lb $t1, 6($a0) 
+	sub $t1, $t1, $t0
+	li $t2, 1000
+	mult $t2, $t1
+	mflo $v0
+	
+	lb $t1, 7($a0)
+	sub $t1, $t1, $t0
+	li $t2, 100
+	mult $t2, $t1
+	mflo $t1
+	add $v0, $v0, $t1
+
+	lb $t1, 8($a0)
+	sub $t1, $t1, $t0
+	li $t2, 10
+	mult $t2, $t1
+	mflo $t1
+	add $v0, $v0, $t1
+
+	lb $t1, 9($a0)
+	sub $t1, $t1, $t0
+	add $v0, $v0, $t1
+
+	lw $t0, ($sp)
+	lw $t1, 4($sp)
+	lw $t2, 8($sp)
+	addi $sp, $sp, 12
+
+	jr $ra
+
+
 
