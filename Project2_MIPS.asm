@@ -61,6 +61,12 @@
 	newline: .asciiz "\r\n"
 
 	ArrayOption: .word do1,do2,do3,do4,do5,do6,do7,do8,do9
+# nhaptime va convert
+	msgNgay: 	.asciiz "nhap ngay DAY (DD): "
+	msgThang: 	.asciiz "nhap thang MONTH (MM): "
+	msgNam: 	.asciiz "nhap nam YEAR (YYYY): "
+	errMsg: 	.asciiz "Ngay khong hop le !"
+	kq_convert:	.space 20
 
 .text
 
@@ -88,6 +94,7 @@ Menu:
 	sw	$ra, 0($sp)
 	
 	#####################NHAP TIME################################ Them vao day
+	jal nhapTime
 	
 	li	$v0, 4
 	la	$a0, MENU
@@ -437,4 +444,729 @@ CanChi:
 	lw $ra,0($sp)
 	addi $sp,$sp,8
 	jr $ra
+#----------------BHUY
+.globl nhapTime
+	#ngay nhap se luu vao $15, dang int
+	#thang nhap se luu vao $14, dang int
+	#nam nhap se luu vao $10, dang int
+	#void nhapTime
+	nhapTime:
+	sw 	$ra, ($sp)
+	li 	$2, 4
+	la 	$4, msgNgay
+	syscall
+	li 	$2, 5
+	syscall
+	move 	$15, $2
+	
+	
+	li 	$2, 4
+	la 	$4, msgThang
+	syscall
+	li 	$2, 5
+	syscall
+	move 	$14, $2
+	
+	
+	li 	$2, 4
+	la 	$4, msgNam
+	syscall
+	li 	$2, 5
+	syscall
+	move 	$10, $2
+	
+	jal 	check
+	
+	lw 	$ra, ($sp)
+	jr 	$ra
+	
+.globl is_leap_year
+	#bool is_leap_year(int year)
+	#a0 = year
+	is_leap_year:
+	move 	$k0, $a0
+        li      $v0, 0                  # mac dinh k nhuan
+
+        li      $t0, 4                  # t0 = 4
+        divu    $a0, $t0                # year/4
+        mfhi    $t1                     # tim so du
+        bne     $t1, $zero, exit        # khong chia het cho 4
+	
+        li      $t0, 100                # $t0 = 100
+        div    	$a0, $t0                # year/100
+        mfhi    $t1                     
+        bne     $t1, $zero, set_true    # k chia het cho 100 (year < 100)
+
+        # chia het cho 100
+        # va chia het cho 400 thi ok
+        li      $t0, 400                # $t0 = 400
+        divu    $a0, $t0                # year/400
+        mfhi    $t1                     
+        bne     $t1, $zero, exit        # k chia het cho 400
+set_true:
+        addi    $v0, $v0, 1             # true
+exit:
+	move 	$a0, $k0
+        jr      $ra			#return
+
+.globl slNgay
+	#int slNgay(int thang, int nam)
+	#thang = $14
+	#nam = $10
+	
+	slNgay:
+	move 	$s1, $ra
+	beq 	$14, 1, slngay31
+	beq 	$14, 3, slngay31
+	beq 	$14, 5, slngay31
+	beq 	$14, 7, slngay31
+	beq 	$14, 8, slngay31
+	beq 	$14, 10, slngay31
+	beq 	$14, 12, slngay31
+	
+	beq 	$14, 4, slngay30
+	beq 	$14, 6, slngay30
+	beq 	$14, 9, slngay30
+	beq 	$14, 11, slngay30
+	
+	slngaythang2:
+	move 	$a0, $10
+	jal 	is_leap_year
+	beq 	$v0, 0, thang2khongnhuan
+	
+	beq 	$v0, 1, thang2nhuan
+	
+	thang2nhuan:
+	li 	$a0, 29
+	move 	$ra, $s1
+	jr 	$ra
+	
+	thang2khongnhuan:
+	li 	$a0, 28
+	move 	$ra, $s1
+	jr 	$ra
+	
+	slngay31:
+	li 	$a0, 31
+	jr 	$ra
+	
+	slngay30:
+	li 	$a0, 30
+	jr 	$ra
+	
+
+.globl check
+	# check(int ngay, int thang, int nam)
+	# false thi exit program
+	# true thi bien TIME se mang gia tri cua ngay vua nhap, addr bien time auto gan vao $a0
+	check:
+	
+	move 	$t9, $ra
+	#kiem tra nam 0k
+	sgt 	$t1, $10, $zero
+	beqz 	$t1, false 
+	
+	#kiem tra thang 0k
+	li 	$t5, 0 #thang > 0
+	sgt 	$t1, $14, $t5
+	beqz 	$t1, false
+	
+	li 	$t5, 13 #thang < 13
+	slt 	$t1, $14, $t5
+	beqz 	$t1, false
+	
+	#kiem tra ngay
+	li 	$t5, 0
+	sgt 	$t1, $15, $t5 #if ngay > 0 -> t1 = 1
+	beqz 	$t1, false #if t1 = 0 -> ngay < 1 -> false
+	
+	jal 	slNgay
+	#a0 = slngay
+	#neu ngay > a0 return false
+	
+	
+	ble 	$15, $a0, true
+	
+	false:
+	la 	$a0, errMsg
+	li 	$v0, 4
+	syscall
+	
+	li 	$v0, 10
+	syscall
+	#li 	$a0, 0
+	#move 	$ra, $s0
+	#jr 	$ra
+	true:
+	# neu true thi bat dau luu vao time
+	la 	$s1, Time
+      	
+      	move $a0, $15
+      	jal itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+ 
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', nex1
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	nex1:
+      	li 	$t4, '/'
+      	sb	$t4, ($s1)
+      	add	$s1, $s1, 1
+      	
+      	move $a0, $14
+      	jal itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', nex2		# neu gap null thi nex
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	nex2:
+      	li 	$t4, '/'
+      	sb	$t4, ($s1)
+      	add	$s1, $s1, 1
+      	
+      	move $a0, $10
+ 	jal itoa
+ 	
+ 	lb 	$t4, 0($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	
+      	lb 	$t4, 1($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+ 	
+ 	lb 	$t4, 2($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	
+      	lb 	$t4, 3($s0)
+      	sb   	$t4, ($s1)     		# luu vao time
+      	add  	$s1, $s1, 1    		# len 1 o
+      	
+ 	addi 	$s1, $s1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($s1)
+	
+	move 	$ra, $t9
+	jr 	$ra
+	
+.globl itoa
+# a0 = num
+# s0 = addr cua return value
+# char* itoa(int n)
+itoa:
+	move 	$s5, $ra
+      	la   	$t0, buffer    		# load buf
+      	add  	$t0, $t0, 30   		# seek the end
+      	sb   	$0, 1($t0)     		# null-terminated str
+      	sb   	$t1, ($t0)     		# init. with ascii 0
+      	li   	$t3, 10        		# t3 = 10
+      	beq  	$a0, $0, end_itoa 	# =0 thi end
+	
+	loop_itoa:
+      	div  	$a0, $t3       		# a /= 10
+      	mflo 	$a0
+      	mfhi 	$t4            		# lay mod =
+      	add  	$t4, $t4, '0'  		# int -> char
+      	sb   	$t4, ($t0)     		# luu vao buf
+      	sub  	$t0, $t0, 1    		# lui buf ve 1 o
+      	bne  	$a0, $0, loop_itoa  	# neu chua = 0 thi tiep tuc
+      	addi 	$t0, $t0, 1    		# len buf 1 o de ve dung' vi tri
+	
+	end_itoa:
+      	move 	$s0, $t0      		# tra dia chi str ve s0
+      	move 	$ra, $s5
+      	jr   	$ra      
+
+.globl convert
+
+convert:
+	move $s6, $ra
+	# ngay $15
+	# thang $14
+	# nam $10
+	# type $13
+	li $13, 'B'
+	
+	la 	$a1, kq_convert
+	
+	beq 	$13, 'A', A
+	beq 	$13, 'B', B
+	beq 	$13, 'C', C
+	A:
+	move $a0, $14
+      	jal itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', cnex1
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	cnex1:
+      	li 	$t4, '/'
+      	sb	$t4, ($a1)
+      	add	$a1, $a1, 1
+      	
+      	move $a0, $15
+      	jal itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', cnex2		# neu gap null thi nex
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	cnex2:
+      	li 	$t4, '/'
+      	sb	$t4, ($a1)
+      	add	$a1, $a1, 1
+      	
+      	move $a0, $10
+ 	jal itoa
+ 	
+ 	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 1($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 	
+ 	lb 	$t4, 2($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 3($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+ 	addi 	$a1, $a1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($a1)
+ 	
+      	move 	$ra, $s6
+      	jr 	$ra
+	B:#s3s4s7t7 free
+	beq 	$14, 1, thang1
+	beq 	$14, 2, thang2
+	beq 	$14, 3, thang3
+	beq 	$14, 4, thang4
+	beq 	$14, 5, thang5
+	beq 	$14, 6, thang6
+	beq 	$14, 7, thang7
+	beq 	$14, 8, thang8
+	beq 	$14, 9, thang9
+	beq 	$14, 10, thang10
+	beq 	$14, 11, thang11
+	beq 	$14, 12, thang12
+	
+	thang1:#kq=a1
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add	$a1, $a1, 1
+	
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'n'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang2:
+	li 	$t4, 'F'
+	sb 	$t4, ($a1)
+	add	$a1, $a1, 1
+	
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'b'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang3:
+	li 	$t4, 'M'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'r'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang4:
+	li 	$t4, 'A'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'p'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'r'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang5:
+	li 	$t4, 'M'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'y'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1 
+	j 	next
+	thang6:
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'n'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang7:
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'l'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang8:
+	li 	$t4, 'A'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'g'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang9:
+	li 	$t4, 'S'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'p'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang10:
+	li 	$t4, 'O'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'c'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 't'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang11:
+	li 	$t4, 'N'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'o'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'v'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	next
+	thang12:
+	li 	$t4, 'D'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'c'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	next:
+	
+	li 	$t4, ' '
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	move 	$a0, $15
+      	jal 	itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', Bnex
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+	Bnex:
+	
+	li 	$t4, ','
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, ' '
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	move 	$a0, $10
+ 	jal 	itoa
+ 	
+ 	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 1($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 	
+ 	lb 	$t4, 2($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 3($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+ 	addi 	$a1, $a1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($a1)
+	
+	move 	$ra, $s6
+	jr 	$ra
+	C:
+	move 	$a0, $15
+      	jal 	itoa
+      	
+      	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 
+      	lb 	$t4, 1($s0)
+      	beq	$t4, '\0', Cnex
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+	Cnex:
+	li 	$t4, ' '
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	beq 	$14, 1, thang1C
+	beq 	$14, 2, thang2C
+	beq 	$14, 3, thang3C
+	beq 	$14, 4, thang4C
+	beq	$14, 5, thang5C
+	beq 	$14, 6, thang6C
+	beq 	$14, 7, thang7C
+	beq 	$14, 8, thang8C
+	beq 	$14, 9, thang9C
+	beq 	$14, 10, thang10C
+	beq 	$14, 11, thang11C
+	beq 	$14, 12, thang12C
+	
+	thang1C:#kq=a1
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'n'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang2C:
+	li 	$t4, 'F'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'b'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang3C:
+	li 	$t4, 'M'
+	sb 	$t4, ($a1)
+	add	$a1, $a1, 1
+	
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, 'r'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang4C:
+	li 	$t4, 'A'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'p'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'r'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang5C:
+	li 	$t4, 'M'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'a'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'y'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1 
+	j 	nextC
+	thang6C:
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'n'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang7C:
+	li 	$t4, 'J'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'l'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang8C:
+	li 	$t4, 'A'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'u'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'g'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang9C:
+	li 	$t4, 'S'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'p'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang10C:
+	li 	$t4, 'O'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'c'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 't'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang11C:
+	li 	$t4, 'N'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'o'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'v'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	j 	nextC
+	thang12C:
+	li 	$t4, 'D'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'e'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	li 	$t4, 'c'
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	nextC:
+	li 	$t4, ','
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	li 	$t4, ' '
+	sb 	$t4, ($a1)
+	add 	$a1, $a1, 1
+	
+	
+	
+	move 	$a0, $10
+ 	jal 	itoa
+ 	
+ 	lb 	$t4, 0($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 1($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+ 	
+ 	lb 	$t4, 2($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+      	lb 	$t4, 3($s0)
+      	sb   	$t4, ($a1)     		# luu vao time
+      	add  	$a1, $a1, 1    		# len 1 o
+      	
+ 	addi 	$a1, $a1, 1
+ 	li 	$t4, '\0' 		#null terminator
+ 	sb 	$t4, ($a1)
+	
+      	move 	$ra, $s6	
+	jr 	$ra
+#---------------------------------
 
