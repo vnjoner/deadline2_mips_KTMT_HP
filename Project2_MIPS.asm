@@ -219,9 +219,19 @@ do5:
 	j Menu.End
 
 do6:
-	li $a0,6
-	li $v0,1
+	la $a0,Time
+	jal Year
+
+	move $a3,$a0
+	jal CanChi
+
+	la $a0,newline
+	li $v0,4
 	syscall
+
+	la $a0,CanChi.Result
+	syscall
+
 	j Menu.End
 
 do7:
@@ -469,8 +479,12 @@ fputs_loop:
 
 #$a0 = source1, $a2 = source2 ,$a1 = Destination
 Str.Concatenate:
-	subi 	$sp,$sp,4
+	subi 	$sp,$sp,20
 	sw 	$ra,0($sp)
+	sw	$a0,4($sp)
+	sw	$a1,8($sp)
+	sw	$a2,12($sp)
+	sw 	$v0,16($sp)
 # Copy first string to result buffer
 	jal 	Str.Copier
 	nop
@@ -479,14 +493,18 @@ Str.Concatenate:
 	or 	$a1, $v0, $zero
 	jal 	Str.Copier
 	lw 	$ra,0($sp)
-	addi 	$sp,$sp,4
+	lw	$a0,4($sp)
+	lw	$a1,8($sp)
+	lw	$a2,12($sp)
+	lw 	$v0,16($sp)
+	addi 	$sp,$sp,20
 	jr 	$ra
 
 
 #$a0 = source1 $a1 = Destination
 #$v0 = result
 Str.Copier:
-	subi 	$sp,$sp,4
+	subi 	$sp,$sp,12
 	sw 	$ra,0($sp)
 	sw 	$t0,4($sp)
 	sw 	$t1,8($sp)
@@ -509,11 +527,15 @@ loopCopier.out:
 	addi 	$sp,$sp,12
 	jr 	$ra
 
+#$a3 = nam
+#KQ = CanChi.Result
 CanChi:
-	subi	$sp,$sp,8
+	subi	$sp,$sp,16
 	sw 	$ra,0($sp)
+	sw	$t0,4($sp)
+	sw	$t1,8($sp)
+	sw	$3,12($sp)
 
-	li 	$a3,2019
 
 #tinh toan can = (nam + 6 )%10
 	move 	$t0,$a3
@@ -552,12 +574,12 @@ CanChi:
 
 	jal 	Str.Concatenate
 
-	la 	$a0,CanChi.Result
-	li 	$v0,4
-	syscall
 
 	lw 	$ra,0($sp)
-	addi 	$sp,$sp,8
+	lw	$t0,4($sp)
+	lw	$t1,8($sp)
+	lw	$3,12($sp)
+	addi 	$sp,$sp,16
 	jr 	$ra
 
 #----------------BHUY
