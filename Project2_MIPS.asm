@@ -81,7 +81,7 @@
 	msgNam: 	.asciiz "nhap nam YEAR (YYYY): "
 	errMsg: 	.asciiz "Ngay khong hop le !"
 	kq_convert:	.space 20
-
+	typeMsg:	.asciiz "Nhap type: "
 .text
 
 main:
