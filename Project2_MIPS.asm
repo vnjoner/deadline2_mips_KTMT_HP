@@ -103,6 +103,7 @@ Menu:
 	sw	$ra, 0($sp)
 	
 	#####################NHAP TIME################################ Them vao day
+	la $s2, Time #la bien time vao $s2 de nhap
 	jal nhapTime
 	
 	li	$v0, 4
