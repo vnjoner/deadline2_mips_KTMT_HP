@@ -10,8 +10,8 @@
 	date1: .word 1,1,1
 	date2: .word 1,1,1
 
-	leapYear: .word 0,0 #luu 2 nam nhuan gan nhat
 	StrLeapYear: .space 9 # luu 2 nam nhuan gan nhat vao trong string
+	leapYear: .word 0,0 #luu 2 nam nhuan gan nhat
 
 	fin : .asciiz "input.txt"
 	fout : .asciiz "output.txt"
