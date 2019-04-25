@@ -219,9 +219,19 @@ do5:
 	j Menu.End
 
 do6:
-	li $a0,6
-	li $v0,1
+	la $a0,Time
+	jal Year
+
+	move $a3,$a0
+	jal CanChi
+
+	la $a0,newline
+	li $v0,4
 	syscall
+
+	la $a0,CanChi.Result
+	syscall
+
 	j Menu.End
 
 do7:
